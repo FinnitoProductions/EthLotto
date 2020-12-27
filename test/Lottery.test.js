@@ -29,18 +29,18 @@ describe('Lottery',  () => {
     });
 
     it ('can enter one account', async() => {
-        await lottery.methods.enter().send({ from: accounts[1], value: web3.utils.toWei('0.02', 'ether')});
-        const players = await lottery.methods.getPlayers().call();
+        await lottery.methods.enter().send({ from: accounts[1], value: web3.utils.toWei('0.02', 'ether'), gas:1000000});
+        const players = await lottery.methods.getPlayerAddresses().call();
 
         assert.equal(accounts[1], players[0]);
         assert.equal(1, players.length);
     });
 
     it ('can enter multiple accounts', async() => {
-        await lottery.methods.enter().send({ from: accounts[0], value: web3.utils.toWei('0.02', 'ether')});
-        await lottery.methods.enter().send({ from: accounts[1], value: web3.utils.toWei('0.05', 'ether')});
-        await lottery.methods.enter().send({ from: accounts[4], value: web3.utils.toWei('0.01', 'ether')});
-        const players = await lottery.methods.getPlayers().call();
+        await lottery.methods.enter().send({ from: accounts[0], value: web3.utils.toWei('0.02', 'ether'), gas:1000000});
+        await lottery.methods.enter().send({ from: accounts[1], value: web3.utils.toWei('0.05', 'ether'), gas:1000000});
+        await lottery.methods.enter().send({ from: accounts[4], value: web3.utils.toWei('0.01', 'ether'), gas:1000000});
+        const players = await lottery.methods.getPlayerAddresses().call();
 
         assert.equal(accounts[0], players[0]);
         assert.equal(accounts[1], players[1]);
@@ -55,7 +55,7 @@ describe('Lottery',  () => {
         } catch(err) {
             assert(err);
         }
-        const players = await lottery.methods.getPlayers().call();
+        const players = await lottery.methods.getPlayerAddresses().call();
 
         assert.equal(0, players.length);
     });
@@ -86,7 +86,8 @@ describe('Lottery',  () => {
     it ('sends money to winner and resets players[]', async() => {
         await lottery.methods.enter().send({
             from: accounts[1],
-            value: web3.utils.toWei('2', 'ether')
+            value: web3.utils.toWei('2', 'ether'),
+            gas:1000000 
         });
 
         const initialBalance = await web3.eth.getBalance(accounts[1]);
@@ -94,6 +95,6 @@ describe('Lottery',  () => {
         const finalBalance = await web3.eth.getBalance(accounts[1]);
 
         assert(finalBalance - initialBalance > web3.utils.toWei('1.8', 'ether')); // not exactly equal to 2 because of gas cost
-        assert.equal((await lottery.methods.getPlayers().call()).length, 0);
+        assert.equal((await lottery.methods.getPlayerAddresses().call()).length, 0);
     });
 });
