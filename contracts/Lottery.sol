@@ -1,8 +1,9 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.8.0;
 
 /**
  * @title An Ethereum lottery in which one's chances of winning are proportional to their entered funds.
  * @author Finn Frankis
+ * SPDX-License-Identifier: MIT
  */
 contract Lottery {
     address public manager;
@@ -17,7 +18,7 @@ contract Lottery {
     /**
      * @notice Constructs a new Lottery object with the lottery manager defined as the contract's creator.
      */
-    function Lottery() public {
+    constructor() {
         manager = msg.sender;
         potSize = 0;
         maxPotSize = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
@@ -29,7 +30,7 @@ contract Lottery {
     function enter() public payable {
         require(msg.value >= 0.01 ether);
         require(potSize + msg.value <= maxPotSize); // avoid overflow
-
+        
         if (playerWagers[msg.sender] == 0) { // player not yet wagered
             playerAddresses.push(msg.sender);
         }
@@ -54,7 +55,7 @@ contract Lottery {
             currentTotalWagers += playerWagers[playerAddresses[0]];
         }
 
-        playerAddresses[currentPlayer].transfer(this.balance);
+        payable(playerAddresses[currentPlayer]).transfer(address(this).balance);
         reset();
     }
 
@@ -72,14 +73,14 @@ contract Lottery {
      * by hashing the block difficulty, current time, and number of players.
      */
     function random() private view returns (uint) {
-        return uint(keccak256(block.difficulty, now, playerAddresses));
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, playerAddresses)));
     }
 
     /**
      * @notice Retrieves the list of entered addresses.
      * @return the players in the lottery
      */
-    function getPlayerAddresses() public view returns (address[]) {
+    function getPlayerAddresses() public view returns (address[] memory) {
         return playerAddresses;
     }
 
